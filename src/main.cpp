@@ -2,16 +2,15 @@
 #include "ofApp.h"
 
 //========================================================================
-int main( ){
-
-	//Use ofGLFWWindowSettings for more options like multi-monitor fullscreen
+int main( )
+{
 	ofGLWindowSettings settings;
-	settings.setSize(1024, 768);
-	settings.windowMode = OF_WINDOW; //can also be OF_FULLSCREEN
+	settings.windowMode = OF_WINDOW;
+	settings.setSize(1920, 1080);
 
 	auto window = ofCreateWindow(settings);
+	ofSetWindowPosition(0, 0);
 
 	ofRunApp(window, make_shared<ofApp>());
 	ofRunMainLoop();
-
 }

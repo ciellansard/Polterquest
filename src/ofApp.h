@@ -1,10 +1,21 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxAssimpModelLoader.h"
+#include "ofxImGui.h"
 
 class ofApp : public ofBaseApp{
 
 	public:
+		// 3D rendering
+		ofEasyCam m_cam;
+		ofTexture m_tilesheet;
+		ofLight m_camLight;
+		ofMesh m_mansion;
+		float m_camRotFactor;
+		bool m_camIsMoving;
+
+
 		void setup();
 		void update();
 		void draw();
