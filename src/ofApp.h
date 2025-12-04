@@ -11,14 +11,21 @@ class ofApp : public ofBaseApp{
 		ofEasyCam m_cam;
 		ofTexture m_tilesheet;
 		ofLight m_camLight;
-		ofMesh m_mansion;
+		ofMesh m_mansion, m_battery, * m_hearts, m_gun, m_itemSlot, m_item;
+		float m_attenuationFactor;
 
 		// Player / camera movement
 		float m_camRotFactor;
 		bool m_camIsMoving;
 
 		// Resources
-		float m_batteryPercentage, m_healthPercentage;
+		ofTexture m_batterySprites[7], m_heartSmallSprites, m_heartLargeSprites;
+		float m_batteryPercentage;
+		int m_batteryState;
+		float m_healthPercentage;
+		float m_uiRot;
+
+		bool m_isSucking = false;
 
 		void setup();
 		void update();
