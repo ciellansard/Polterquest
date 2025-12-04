@@ -12,9 +12,13 @@ class ofApp : public ofBaseApp{
 		ofTexture m_tilesheet;
 		ofLight m_camLight;
 		ofMesh m_mansion;
+
+		// Player / camera movement
 		float m_camRotFactor;
 		bool m_camIsMoving;
 
+		// Resources
+		float m_batteryPercentage, m_healthPercentage;
 
 		void setup();
 		void update();
@@ -31,5 +35,4 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
-		
 };
