@@ -1,12 +1,5 @@
 #include "Mob.h"
 
-std::string type;
-ofVec3f pos, rot;
-float speed;
-int state;
-bool isAwareOfPlayer;
-float lastTimeAwareOfPlayer;
-
 // Player _player
 Mob::Mob(int _type, ofVec3f _pos, ofVec3f _rot)
 {

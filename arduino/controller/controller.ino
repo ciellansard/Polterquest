@@ -30,38 +30,36 @@ void setup() {
 }
 
 void loop() {
-  analogRead(X_pin);
-  analogRead(Y_pin);
+  //analogRead(X_pin);
+  //analogRead(Y_pin);
 
-  Serial.print("Joystick X-axis: ");
+  Serial.print("Joystick: \n");
   Serial.print(analogRead(X_pin));
   Serial.print("\n");
-  Serial.print("Joystick Y-axis: ");
   Serial.println(analogRead(Y_pin));
   Serial.print("\n\n");
 
   sensors_event_t event;
   accel.getEvent(&event);
 
-  Serial.println();
-  Serial.print("Acceleromter X: ");
+  Serial.print("Accelerometer: \n");
   Serial.print(event.acceleration.x);
-  Serial.print("Accelerometer Y: ");
+  Serial.print("\n");
   Serial.print(event.acceleration.y);
-  Serial.print("Accelerometer Z: ");
+  Serial.print("\n");
   Serial.print(event.acceleration.z);
   Serial.print("\n\n");
 
   buttonState = digitalRead(buttonPin);
 
+  Serial.print("Button: \n");
   if (buttonState == HIGH) {
-    Serial.print("\n");
-    Serial.print("button off");
+    Serial.print("0");
   } 
   else {
-    Serial.print("\n");
-    Serial.print("button on");
+    Serial.print("1");
   }
+  Serial.print("\n\n");
   
   delay(1000);
   }

@@ -9,7 +9,7 @@ class ofApp : public ofBaseApp
 {
 	public:
 		// Controller
-		ofSerial m_serial;
+		//ofSerial m_serial;
 		ofArduino m_arduino;
 		const std::string ARDUINO_DEVICE_NAME = "COM6";
 		static const int ARDUINO_BAUD_RATE = 9600;
@@ -18,6 +18,7 @@ class ofApp : public ofBaseApp
 		static const int PIN_JOYSTICK_Y_INPUT = 1;
 		static const int PIN_ACCELEROMETER_X_INPUT = 4;
 		static const int PIN_ACCELEROMETER_Y_INPUT = 5;
+		bool m_buttonVal;
 		ofVec2f m_joystickVal;
 		ofVec3f m_accelerometerVal;
 		bool m_bSetup;
@@ -47,7 +48,7 @@ class ofApp : public ofBaseApp
 		bool m_isSucking = false;
 
 		// Mobs
-		//vector<Mob> mobs;
+		std::vector<Mob> mobs;
 
 		void setup();
 		void update();

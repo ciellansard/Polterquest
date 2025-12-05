@@ -39,9 +39,9 @@ void ofApp::setup()
 
 
 	// Set up controller
-	m_serial.enumerateDevices();
-	m_serial.setup(0, 9600);
-	m_arduino.connect(ARDUINO_DEVICE_NAME, ARDUINO_BAUD_RATE);
+	//m_serial.enumerateDevices();
+	//m_serial.setup(0, 9600);
+	m_arduino.connect("COM6", 9600);
 
 	// Listen for EInitialized notification. this indicates that
 	// the arduino is ready to receive commands and it is safe to
@@ -58,11 +58,9 @@ void ofApp::setup()
 	m_camLight.setAttenuation(0.2f, 0.1f, 0.05f); // Dim the camera's attached light as it shines further away.  
 	ofEnableLighting();
 	m_camLight.enable();
-
-	// Create ghosts
-	//mobs.push_back(Mob(0, { 2, 0, 10 }, { 0, 0, 0 }));
-
-
+	
+	// Create mobs
+	mobs.push_back(Mob(0, {2, 0, 10}, {0, 0, 0}));
 
 
 	ofEnableDepthTest();
@@ -71,7 +69,9 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
-	//updateArduino();
+	updateArduino();
+
+	//
 
 	m_camLight.setPosition(m_cam.getPosition());
 	m_cam.rotateDeg(0.5f * m_camRotFactor, 0, 1, 0);
@@ -190,64 +190,88 @@ void ofApp::keyReleased(int key)
 }
 
 //--------------------------------------------------------------
-void ofApp::setupArduino(const int& _version)
-{
-	m_bSetup = true;
+void ofApp::setupArduino(const int& version) {
 
 	// remove listener because we don't need it anymore
 	ofRemoveListener(m_arduino.EInitialized, this, &ofApp::setupArduino);
+
+	// it is now safe to send commands to the Arduino
+	m_bSetup = true;
 
 	// print firmware name and version to the console
 	ofLogNotice() << m_arduino.getFirmwareName();
 	ofLogNotice() << "firmata v" << m_arduino.getMajorFirmwareVersion() << "." << m_arduino.getMinorFirmwareVersion();
 
-	//analog input
-	m_arduino.sendAnalogPinReporting(PIN_JOYSTICK_X_INPUT, ARD_ANALOG);
-	m_arduino.sendAnalogPinReporting(PIN_JOYSTICK_Y_INPUT, ARD_ANALOG);
-	m_arduino.sendAnalogPinReporting(PIN_ACCELEROMETER_X_INPUT, ARD_ANALOG);
-	m_arduino.sendAnalogPinReporting(PIN_ACCELEROMETER_Y_INPUT, ARD_ANALOG);
+	// Note: pins A0 - A5 can be used as digital input and output.
+	// Refer to them as pins 14 - 19 if using StandardFirmata from Arduino 1.0.
+	// If using Arduino 0022 or older, then use 16 - 21.
+	// Firmata pin numbering changed in version 2.3 (which is included in Arduino 1.0)
 
-	//PMW/digital output
-	m_arduino.sendDigitalPinMode(PIN_BUTTON_INPUT, ARD_PWM);
+	
 
+	// set pins D2 and A5 to digital input
+	m_arduino.sendDigitalPinMode(2, ARD_INPUT);
+	m_arduino.sendDigitalPinMode(19, ARD_INPUT);  // pin 21 if using StandardFirmata from Arduino 0022 or older
+
+	// set pin A0 to analog input
+	m_arduino.sendAnalogPinReporting(0, ARD_ANALOG);
+
+	// set pin D13 as digital output
+	m_arduino.sendDigitalPinMode(13, ARD_OUTPUT);
+	// set pin A4 as digital output
+	m_arduino.sendDigitalPinMode(18, ARD_OUTPUT);  // pin 20 if using StandardFirmata from Arduino 0022 or older
+
+	// set pin D11 as PWM (analog output)
+	m_arduino.sendDigitalPinMode(11, ARD_PWM);
+
+	// attach a servo to pin D9
+	// servo motors can only be attached to pin D3, D5, D6, D9, D10, or D11
+	m_arduino.sendServoAttach(9);
+
+	// Listen for changes on the digital and analog pins
 	ofAddListener(m_arduino.EDigitalPinChanged, this, &ofApp::digitalPinChanged);
 	ofAddListener(m_arduino.EAnalogPinChanged, this, &ofApp::analogPinChanged);
 }
 
 //--------------------------------------------------------------
-void ofApp::updateArduino() 
-{
+void ofApp::updateArduino() {
+
 	// update the arduino, get any data or messages.
 	// the call to ard.update() is required
 	m_arduino.update();
+	printf("%i\n\n", m_arduino.getTotalPins());
+	//m_buttonVal = m_arduino.getDigital(PIN_BUTTON_INPUT);
+	//m_joystickVal.set(m_arduino.getAnalog(PIN_JOYSTICK_X_INPUT), m_arduino.getAnalog(PIN_JOYSTICK_Y_INPUT));
+	//m_accelerometerVal.set(m_arduino.getAnalog(PIN_ACCELEROMETER_X_INPUT), m_arduino.getAnalog(PIN_ACCELEROMETER_Y_INPUT));
+
+	//printf("%i     |     ( %f, %f )     |     ( %f, %f, %f )\n\n", (int)m_buttonVal, m_joystickVal.x, m_joystickVal.y, m_accelerometerVal.x, m_accelerometerVal.y, m_accelerometerVal.z);
 
 	// do not send anything until the arduino has been set up
 	if (m_bSetup) {
 		// fade the led connected to pin D11
-		//ard.sendPwm(11, (int)(128 + 128 * sin(ofGetElapsedTimef())));   // pwm...
+		m_arduino.sendPwm(11, (int)(128 + 128 * sin(ofGetElapsedTimef())));   // pwm...
 	}
-}
 
+}
 
 // digital pin event handler, called whenever a digital pin value has changed
 // note: if an analog pin has been set as a digital pin, it will be handled
 // by the digitalPinChanged function rather than the analogPinChanged function.
+
 //--------------------------------------------------------------
-void ofApp::digitalPinChanged(const int& pinNum) 
-{
+void ofApp::digitalPinChanged(const int& pinNum) {
 	// do something with the digital input. here we're simply going to print the pin number and
 	// value to the screen each time it changes
-	std::cout << "digital pin: " << ofToString(pinNum) << " = " << ofToString(m_arduino.getDigital(pinNum));
+	//buttonState = "digital pin: " + ofToString(pinNum) + " = " + ofToString(ard.getDigital(pinNum));
 }
 
-
 // analog pin event handler, called whenever an analog pin value has changed
+
 //--------------------------------------------------------------
-void ofApp::analogPinChanged(const int& pinNum) 
-{
+void ofApp::analogPinChanged(const int& pinNum) {
 	// do something with the analog input. here we're simply going to print the pin number and
 	// value to the screen each time it changes
-	std::cout << "analog pin: " << ofToString(pinNum) << " = " << ofToString(m_arduino.getAnalog(pinNum));
+	//potValue = "analog pin: " + ofToString(pinNum) + " = " + ofToString(ard.getAnalog(pinNum));
 }
 
 
