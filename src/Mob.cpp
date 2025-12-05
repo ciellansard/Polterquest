@@ -42,7 +42,12 @@ Mob::Mob(int _type, ofVec3f _pos, float _rot, ofEasyCam *_player)
 	isAwareOfPlayer = false;
 	lastTimeAwareOfPlayer = NULL;
 }
-
+/*
+Mob::~Mob()
+{
+	delete player;
+}
+*/
 void Mob::update()
 {
 	switch (state)

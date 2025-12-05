@@ -1,0 +1,12 @@
+# Blender 4.5.4 LTS MTL File: 'polterquest_WIP_v012.blend'
+# www.blender.org
+
+newmtl Tilesheet
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 2
+map_Kd C:/Users/kitte/Desktop/Life/School/Fall 2025/Sensor-based Interaction/of_v0.12.0_vs_release/of_v0.12.0_vs_release/apps/myApps/Polterquest/bin/data/images/tilesheet.png
+map_d C:/Users/kitte/Desktop/Life/School/Fall 2025/Sensor-based Interaction/of_v0.12.0_vs_release/of_v0.12.0_vs_release/apps/myApps/Polterquest/bin/data/images/tilesheet.png
