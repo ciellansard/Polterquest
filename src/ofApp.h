@@ -5,9 +5,27 @@
 #include "ofxImGui.h"
 #include "Mob.h"
 
-class ofApp : public ofBaseApp{
-
+class ofApp : public ofBaseApp
+{
 	public:
+		// Controller
+		ofSerial m_serial;
+		ofArduino m_arduino;
+		const std::string ARDUINO_DEVICE_NAME = "COM6";
+		static const int ARDUINO_BAUD_RATE = 9600;
+		static const int PIN_BUTTON_INPUT = 8;
+		static const int PIN_JOYSTICK_X_INPUT = 0;
+		static const int PIN_JOYSTICK_Y_INPUT = 1;
+		static const int PIN_ACCELEROMETER_X_INPUT = 4;
+		static const int PIN_ACCELEROMETER_Y_INPUT = 5;
+		ofVec2f m_joystickVal;
+		ofVec3f m_accelerometerVal;
+		bool m_bSetup;
+		void setupArduino(const int& _version);
+		void updateArduino();
+		void digitalPinChanged(const int& pinNum);
+		void analogPinChanged(const int& pinNum);
+
 		// 3D rendering
 		ofEasyCam m_cam;
 		ofTexture m_tilesheet;

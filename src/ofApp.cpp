@@ -8,6 +8,8 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
+	ofSetBackgroundColor(ofColor::black);
+
 	// Load 3D models
 	ofxAssimpModelLoader loader;
 	loader.loadModel("models/mansion.obj");
@@ -35,7 +37,20 @@ void ofApp::setup()
 	m_batteryPercentage = 1.0f;
 	m_healthPercentage = 1.0f;
 
-	ofSetBackgroundColor(ofColor::black);
+
+	// Set up controller
+	m_serial.enumerateDevices();
+	m_serial.setup(0, 9600);
+	m_arduino.connect(ARDUINO_DEVICE_NAME, ARDUINO_BAUD_RATE);
+
+	// Listen for EInitialized notification. this indicates that
+	// the arduino is ready to receive commands and it is safe to
+	// call setupArduino()
+	ofAddListener(m_arduino.EInitialized, this, &ofApp::setupArduino);
+	m_bSetup = false;
+
+	m_joystickVal = { 0.0f, 0.0f };
+	m_accelerometerVal = { 0.0f, 0.0f, 0.0f };
 
 	// Set up a light that follows the player
 	m_camLight.setPointLight();
@@ -56,6 +71,8 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
+	//updateArduino();
+
 	m_camLight.setPosition(m_cam.getPosition());
 	m_cam.rotateDeg(0.5f * m_camRotFactor, 0, 1, 0);
 	m_cam.setPosition(m_cam.getPosition().x + 0.05f * m_camIsMoving * m_cam.getLookAtDir().x, 
@@ -78,7 +95,7 @@ void ofApp::update()
 		// Camera shake
 		m_cam.setPosition(m_cam.getPosition().x, 1.8f + (sin(ofGetElapsedTimeMillis() / 100.0f) - 1.0f) / 20.0f, m_cam.getPosition().z);
 
-		printf("\%: %f   | state: %i\n", m_batteryPercentage, m_batteryState);
+		//printf("\%: %f   | state: %i\n", m_batteryPercentage, m_batteryState);
 	}
 	else
 	{
@@ -89,9 +106,9 @@ void ofApp::update()
 		m_cam.setPosition(m_cam.getPosition().x, ofLerp(m_cam.getPosition().y, 1.8f, 0.1f), m_cam.getPosition().z);
 	}
 
-	for (int i = 0; i < mobs.size(); i++)
+	//for (int i = 0; i < mobs.size(); i++)
 	{
-		mobs.at(i).update();
+		//mobs.at(i).update();
 	}
 
 
@@ -113,9 +130,9 @@ void ofApp::draw(){
 			}
 			m_tilesheet.unbind();
 
-			for (int i = 0; i < mobs.size(); i++)
+			//for (int i = 0; i < mobs.size(); i++)
 			{
-				mobs.at(i).draw();
+				//mobs.at(i).draw();
 			}
 
 
@@ -171,6 +188,68 @@ void ofApp::keyReleased(int key)
 	if (key == 'w' || key == 'W') m_camIsMoving = false;
 	if (key == 32) m_isSucking = false;
 }
+
+//--------------------------------------------------------------
+void ofApp::setupArduino(const int& _version)
+{
+	m_bSetup = true;
+
+	// remove listener because we don't need it anymore
+	ofRemoveListener(m_arduino.EInitialized, this, &ofApp::setupArduino);
+
+	// print firmware name and version to the console
+	ofLogNotice() << m_arduino.getFirmwareName();
+	ofLogNotice() << "firmata v" << m_arduino.getMajorFirmwareVersion() << "." << m_arduino.getMinorFirmwareVersion();
+
+	//analog input
+	m_arduino.sendAnalogPinReporting(PIN_JOYSTICK_X_INPUT, ARD_ANALOG);
+	m_arduino.sendAnalogPinReporting(PIN_JOYSTICK_Y_INPUT, ARD_ANALOG);
+	m_arduino.sendAnalogPinReporting(PIN_ACCELEROMETER_X_INPUT, ARD_ANALOG);
+	m_arduino.sendAnalogPinReporting(PIN_ACCELEROMETER_Y_INPUT, ARD_ANALOG);
+
+	//PMW/digital output
+	m_arduino.sendDigitalPinMode(PIN_BUTTON_INPUT, ARD_PWM);
+
+	ofAddListener(m_arduino.EDigitalPinChanged, this, &ofApp::digitalPinChanged);
+	ofAddListener(m_arduino.EAnalogPinChanged, this, &ofApp::analogPinChanged);
+}
+
+//--------------------------------------------------------------
+void ofApp::updateArduino() 
+{
+	// update the arduino, get any data or messages.
+	// the call to ard.update() is required
+	m_arduino.update();
+
+	// do not send anything until the arduino has been set up
+	if (m_bSetup) {
+		// fade the led connected to pin D11
+		//ard.sendPwm(11, (int)(128 + 128 * sin(ofGetElapsedTimef())));   // pwm...
+	}
+}
+
+
+// digital pin event handler, called whenever a digital pin value has changed
+// note: if an analog pin has been set as a digital pin, it will be handled
+// by the digitalPinChanged function rather than the analogPinChanged function.
+//--------------------------------------------------------------
+void ofApp::digitalPinChanged(const int& pinNum) 
+{
+	// do something with the digital input. here we're simply going to print the pin number and
+	// value to the screen each time it changes
+	std::cout << "digital pin: " << ofToString(pinNum) << " = " << ofToString(m_arduino.getDigital(pinNum));
+}
+
+
+// analog pin event handler, called whenever an analog pin value has changed
+//--------------------------------------------------------------
+void ofApp::analogPinChanged(const int& pinNum) 
+{
+	// do something with the analog input. here we're simply going to print the pin number and
+	// value to the screen each time it changes
+	std::cout << "analog pin: " << ofToString(pinNum) << " = " << ofToString(m_arduino.getAnalog(pinNum));
+}
+
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
