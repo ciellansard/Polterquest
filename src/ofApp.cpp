@@ -53,7 +53,7 @@ void ofApp::setup()
 	m_camLight.enable();
 	
 	// Create mobs
-	mobs.push_back(Mob(0, {2, 0, 5}, 15));
+	mobs.push_back(Mob(0, {2, 0, 5}, 15, &m_cam));
 
 
 	ofEnableDepthTest();
@@ -192,6 +192,7 @@ void ofApp::setupArduino(const int& version) {
 	m_bSetup = true;
 
 	// print firmware name and version to the console
+	ofLogNotice() << "AHHHHHHHHHHHHHHHHHH!";
 	ofLogNotice() << m_arduino.getFirmwareName();
 	ofLogNotice() << "firmata v" << m_arduino.getMajorFirmwareVersion() << "." << m_arduino.getMinorFirmwareVersion();
 
@@ -233,9 +234,9 @@ void ofApp::updateArduino() {
 	// the call to ard.update() is required
 	m_arduino.update();
 	printf("%i\n\n", m_arduino.getTotalPins());
-	//m_buttonVal = m_arduino.getDigital(PIN_BUTTON_INPUT);
-	//m_joystickVal.set(m_arduino.getAnalog(PIN_JOYSTICK_X_INPUT), m_arduino.getAnalog(PIN_JOYSTICK_Y_INPUT));
-	//m_accelerometerVal.set(m_arduino.getAnalog(PIN_ACCELEROMETER_X_INPUT), m_arduino.getAnalog(PIN_ACCELEROMETER_Y_INPUT));
+	m_buttonVal = m_arduino.getDigital(PIN_BUTTON_INPUT);
+	m_joystickVal.set(m_arduino.getAnalog(PIN_JOYSTICK_X_INPUT), m_arduino.getAnalog(PIN_JOYSTICK_Y_INPUT));
+	 m_accelerometerVal.set(m_arduino.getAnalog(PIN_ACCELEROMETER_X_INPUT), m_arduino.getAnalog(PIN_ACCELEROMETER_Y_INPUT));
 
 	//printf("%i     |     ( %f, %f )     |     ( %f, %f, %f )\n\n", (int)m_buttonVal, m_joystickVal.x, m_joystickVal.y, m_accelerometerVal.x, m_accelerometerVal.y, m_accelerometerVal.z);
 

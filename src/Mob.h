@@ -14,9 +14,10 @@ public:
 	ofMesh mesh;
 	bool isAwareOfPlayer;
 	float lastTimeAwareOfPlayer;
+	ofEasyCam* player;
 	//Sector sector;
 
-	Mob(int _type, ofVec3f _pos, float _rot);
+	Mob(int _type, ofVec3f _pos, float _rot, ofEasyCam *_player);
 	void update();
 	void draw();
 	void chase();

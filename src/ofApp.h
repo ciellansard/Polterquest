@@ -4,6 +4,7 @@
 #include "ofxAssimpModelLoader.h"
 //#include "ofxImGui.h"
 #include "Mob.h"
+#include "ofArduino.h"
 
 class ofApp : public ofBaseApp
 {
@@ -14,10 +15,10 @@ class ofApp : public ofBaseApp
 		const std::string ARDUINO_DEVICE_NAME = "COM6";
 		static const int ARDUINO_BAUD_RATE = 9600;
 		static const int PIN_BUTTON_INPUT = 8;
-		static const int PIN_JOYSTICK_X_INPUT = 0;
-		static const int PIN_JOYSTICK_Y_INPUT = 1;
-		static const int PIN_ACCELEROMETER_X_INPUT = 4;
-		static const int PIN_ACCELEROMETER_Y_INPUT = 5;
+		static const int PIN_JOYSTICK_X_INPUT = 0 + 14;
+		static const int PIN_JOYSTICK_Y_INPUT = 1 + 14;
+		static const int PIN_ACCELEROMETER_X_INPUT = 4 + 14;
+		static const int PIN_ACCELEROMETER_Y_INPUT = 5 + 14;
 		bool m_buttonVal;
 		ofVec2f m_joystickVal;
 		ofVec3f m_accelerometerVal;

@@ -9,11 +9,12 @@ enum states
 };
 
 // Player _player
-Mob::Mob(int _type, ofVec3f _pos, float _rot)
+Mob::Mob(int _type, ofVec3f _pos, float _rot, ofEasyCam *_player)
 {
 	type = _type;
 	pos = _pos;
 	rot = _rot;
+	player = _player;
 
 	if (type == 0)
 	{
@@ -28,7 +29,7 @@ Mob::Mob(int _type, ofVec3f _pos, float _rot)
 	
 	currentSpeed = defaultSpeed;
 
-	state = 0;
+	state = angry;
 	texPath = "images/mobs/mob" + ofToString(type) + ofToString(state) + ".png";
 	ofLoadImage(tex, texPath);
 
@@ -60,7 +61,8 @@ void Mob::update()
 		case angry:
 		{
 			currentSpeed = defaultSpeed * 3.0f;
-			// rotate to face player
+			rot = atan((player->getPosition().z - pos.z) / (player->getPosition().x - pos.x));
+			//printf("%f\n", rot);
 			break;
 		}
 		case suck:
@@ -71,16 +73,18 @@ void Mob::update()
 		default: break;
 	}
 
+	//printf("%f, %f, %f\n", player->getPosition().x, player->getPosition().y, player->getPosition().z);
+
 	// Get texture for current state
 	if (texPath != "images/mobs/mob" + ofToString(type) + ofToString(state) + ".png") texPath = "images/mobs/mob" + ofToString(type) + ofToString(state) + ".png";
 	ofLoadImage(tex, texPath);
 
 	// Movement
-	pos.y = 0.1f * (sin(ofGetElapsedTimeMillis() * currentSpeed) + 1.0f);
-	pos.x += cos(rot) * currentSpeed;
-	pos.z += sin(rot) * currentSpeed;
+	pos.y = 0.1f * (sin(ofGetElapsedTimeMillis() * -currentSpeed) + 1.0f);
+	pos.x += cos(rot) * -currentSpeed;
+	pos.z += sin(rot) * -currentSpeed;
 
-	((sin(ofGetElapsedTimeMillis() * currentSpeed) == 0)) ? flipFactor = 3 : flipFactor = 1;
+	//((sin(ofGetElapsedTimeMillis() * currentSpeed) == 0)) ? flipFactor = 3 : flipFactor = 1;
 }
 
 void Mob::draw()
