@@ -37,15 +37,8 @@ void ofApp::setup()
 	m_batteryPercentage = 1.0f;
 	m_healthPercentage = 1.0f;
 
-
 	// Set up controller
-	//m_serial.enumerateDevices();
-	//m_serial.setup(0, 9600);
 	m_arduino.connect("COM6", 9600);
-
-	// Listen for EInitialized notification. this indicates that
-	// the arduino is ready to receive commands and it is safe to
-	// call setupArduino()
 	ofAddListener(m_arduino.EInitialized, this, &ofApp::setupArduino);
 	m_bSetup = false;
 
@@ -60,7 +53,7 @@ void ofApp::setup()
 	m_camLight.enable();
 	
 	// Create mobs
-	mobs.push_back(Mob(0, {2, 0, 10}, {0, 0, 0}));
+	mobs.push_back(Mob(0, {2, 0, 5}, 15));
 
 
 	ofEnableDepthTest();
@@ -106,9 +99,9 @@ void ofApp::update()
 		m_cam.setPosition(m_cam.getPosition().x, ofLerp(m_cam.getPosition().y, 1.8f, 0.1f), m_cam.getPosition().z);
 	}
 
-	//for (int i = 0; i < mobs.size(); i++)
+	for (int i = 0; i < mobs.size(); i++)
 	{
-		//mobs.at(i).update();
+		mobs.at(i).update();
 	}
 
 
@@ -130,9 +123,9 @@ void ofApp::draw(){
 			}
 			m_tilesheet.unbind();
 
-			//for (int i = 0; i < mobs.size(); i++)
+			for (int i = 0; i < mobs.size(); i++)
 			{
-				//mobs.at(i).draw();
+				mobs.at(i).draw();
 			}
 
 

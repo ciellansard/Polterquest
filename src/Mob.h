@@ -1,17 +1,22 @@
 #pragma once
 #include "ofMain.h"
+#include "ofxAssimpModelLoader.h"
 
 class Mob : public ofBaseApp
 {
 public: 
 	int type;
-	ofVec3f pos, rot;
-	float speed;
-	int state;
+	ofVec3f pos;
+	float rot, health, defaultSpeed, currentSpeed;
+	int state, flipFactor;
+	std::string texPath;
+	ofTexture tex;
+	ofMesh mesh;
 	bool isAwareOfPlayer;
 	float lastTimeAwareOfPlayer;
+	//Sector sector;
 
-	Mob(int _type, ofVec3f _pos, ofVec3f _rot);
+	Mob(int _type, ofVec3f _pos, float _rot);
 	void update();
 	void draw();
 	void chase();

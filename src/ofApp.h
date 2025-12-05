@@ -2,7 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxAssimpModelLoader.h"
-#include "ofxImGui.h"
+//#include "ofxImGui.h"
 #include "Mob.h"
 
 class ofApp : public ofBaseApp
