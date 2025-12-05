@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "ofxAssimpModelLoader.h"
 #include "ofxImGui.h"
+#include "Mob.h"
 
 class ofApp : public ofBaseApp{
 
@@ -26,6 +27,9 @@ class ofApp : public ofBaseApp{
 		float m_uiRot;
 
 		bool m_isSucking = false;
+
+		// Mobs
+		//vector<Mob> mobs;
 
 		void setup();
 		void update();

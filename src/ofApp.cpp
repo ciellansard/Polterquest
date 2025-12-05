@@ -27,7 +27,7 @@ void ofApp::setup()
 	// Set up the camera / player info
 	m_cam.setAutoDistance(false);
 	m_cam.setPosition(0.0f, 1.8f, 0.0f);
-	m_cam.setNearClip(1); // Eliminates camera clipping on nearby objects. Why does 1 disable it..?
+	m_cam.setNearClip(1); // Minimizes camera clipping on nearby objects.
 	m_cam.rotateDeg(90.0f, 0, 1, 0);
 	m_cam.disableMouseInput();
 	m_camRotFactor = 0;
@@ -43,6 +43,12 @@ void ofApp::setup()
 	m_camLight.setAttenuation(0.2f, 0.1f, 0.05f); // Dim the camera's attached light as it shines further away.  
 	ofEnableLighting();
 	m_camLight.enable();
+
+	// Create ghosts
+	//mobs.push_back(Mob(0, { 2, 0, 10 }, { 0, 0, 0 }));
+
+
+
 
 	ofEnableDepthTest();
 }
@@ -83,6 +89,12 @@ void ofApp::update()
 		m_cam.setPosition(m_cam.getPosition().x, ofLerp(m_cam.getPosition().y, 1.8f, 0.1f), m_cam.getPosition().z);
 	}
 
+	for (int i = 0; i < mobs.size(); i++)
+	{
+		mobs.at(i).update();
+	}
+
+
 	float sign = (m_cam.getOrientationEulerDeg().x == -180.0f || m_cam.getOrientationEulerDeg().x == 180.0f) ? -1.0f : 1.0f;
 	m_uiRot = m_cam.getOrientationEulerDeg().y * sign + ((sign == -1.0f) ? 180.0f : 0);
 }
@@ -93,39 +105,46 @@ void ofApp::draw(){
 
 	m_cam.begin();
 	{
+		ofPushMatrix();
+		{
+			m_tilesheet.bind();
+			{
+				m_mansion.draw();
+			}
+			m_tilesheet.unbind();
+
+			for (int i = 0; i < mobs.size(); i++)
+			{
+				mobs.at(i).draw();
+			}
+
+
+
+			// Set up UI
+			ofTranslate(m_cam.getPosition()); // Follow the player/cam's position
+			ofTranslate(-3.0f * m_cam.getZAxis().x, -1, -3.0f * m_cam.getZAxis().z); // Add an offset to avoid clipping
+			ofRotate(m_uiRot - 90.0f, 0, 1, 0); // Rotate with camera
+			ofDisableLighting(); // Keep UI the same brightness regardless of lighting
+			ofDisableDepthTest(); // Always draw UI last
+				
+			// Draw battery gauge
 			ofPushMatrix();
 			{
-				m_tilesheet.bind();
+				ofTranslate(0, -0.5f, 2.0f);
+				ofScale(10.0f/40.0f);
+
+				m_batteryState = ceil(m_batteryPercentage * 6.0f); // Take 0.0f - 1.0f range, convert to int between 0 - 6
+
+				m_batterySprites[m_batteryState].bind();
 				{
-					m_mansion.draw();
+					m_battery.draw();
 				}
-				m_tilesheet.unbind();
-
-				// Set up UI
-				ofTranslate(m_cam.getPosition()); // Follow the player/cam's position
-				ofTranslate(-3.0f * m_cam.getZAxis().x, -1, -3.0f * m_cam.getZAxis().z); // Add an offset to avoid clipping
-				ofRotate(m_uiRot - 90.0f, 0, 1, 0); // Rotate with camera
-				ofDisableLighting(); // Keep UI the same brightness regardless of lighting
-				ofDisableDepthTest(); // Always draw UI last
-				
-				// Draw battery gauge
-				ofPushMatrix();
-				{
-					ofTranslate(0, -0.5f, 2.0f);
-					ofScale(10.0f/40.0f);
-
-					m_batteryState = ceil(m_batteryPercentage * 6.0f); // Take 0.0f - 1.0f range, convert to int between 0 - 6
-
-					m_batterySprites[m_batteryState].bind();
-					{
-						m_battery.draw();
-					}
-					m_batterySprites[m_batteryState].unbind();
-				}
-				ofPopMatrix();
-				ofEnableLighting();
-				ofEnableDepthTest();
+				m_batterySprites[m_batteryState].unbind();
 			}
+			ofPopMatrix();
+			ofEnableLighting();
+			ofEnableDepthTest();
+		}
 	}
 	m_cam.end();
 }
