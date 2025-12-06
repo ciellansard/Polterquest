@@ -34,7 +34,7 @@ void ofApp::setup()
 	m_cam.rotateDeg(90.0f, 0, 1, 0);
 	m_cam.disableMouseInput();
 	m_camRotFactor = 0;
-	m_camIsMoving = false;
+	m_camMoveFactor = 0;
 	m_batteryPercentage = 1.0f;
 	m_healthPercentage = 1.0f;
 
@@ -73,12 +73,14 @@ void ofApp::setup()
 void ofApp::update()
 {
 	updateArduino();
+	joystickControl();
+	buttonControl();
 
 	m_camLight.setPosition(m_cam.getPosition());
 	m_cam.rotateDeg(0.5f * m_camRotFactor, 0, 1, 0);
-	m_cam.setPosition(m_cam.getPosition().x + 0.05f * m_camIsMoving * m_cam.getLookAtDir().x, 
+	m_cam.setPosition(m_cam.getPosition().x + 0.05f * m_camMoveFactor * m_cam.getLookAtDir().x, 
 		              m_cam.getPosition().y, 
-		              m_cam.getPosition().z + 0.05f * m_camIsMoving * m_cam.getLookAtDir().z);
+		              m_cam.getPosition().z + 0.05f * m_camMoveFactor * m_cam.getLookAtDir().z);
 	
 	// Dim light as battery gets low.
 	m_attenuationFactor = ofMap(m_batteryPercentage, 0.5f, 0.0f, 0.0f, 0.5f);
@@ -94,7 +96,7 @@ void ofApp::update()
 		if (m_batteryPercentage < 0) m_batteryPercentage = 0;
 
 		// Camera shake
-		m_cam.setPosition(m_cam.getPosition().x, 1.8f + (sin(ofGetElapsedTimeMillis() / 100.0f) - 1.0f) / 20.0f, m_cam.getPosition().z);
+		m_cam.setPosition(m_cam.getPosition().x, 1.8f + (sin(ofGetElapsedTimeMillis() / 20.0f) - 1.0f) / 60.0f, m_cam.getPosition().z);
 
 		//printf("\%: %f   | state: %i\n", m_batteryPercentage, m_batteryState);
 	}
@@ -175,10 +177,8 @@ void ofApp::draw(){
 void ofApp::keyPressed(int key)
 {
 	// Move forward
-	if (key == 'w' || key == 'W')
-	{
-		m_camIsMoving = true;
-	}
+	if (key == 'w' || key == 'W') m_camMoveFactor = 1;
+	else if (key == 's' || key == 'S') m_camMoveFactor = -1;
 
 	// Suck
 	if (key == 32)
@@ -190,7 +190,7 @@ void ofApp::keyPressed(int key)
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key)
 {
-	if (key == 'w' || key == 'W') m_camIsMoving = false;
+	if (key == 'w' || key == 'W' || key == 's' || key == 'S') m_camMoveFactor = 0;
 	if (key == 32) m_isSucking = false;
 }
 
@@ -219,6 +219,27 @@ void ofApp::updateArduino()
 		m_buttonVal = m_arduino.getDigital(PIN_BUTTON_INPUT);
 		// cout << "(" << m_joystickVal.x << ", " << m_joystickVal.y << ")   |   (" << m_accelerometerVal.x << ", " << m_accelerometerVal.y << ")   |   " << m_buttonVal << "\n";
 	}
+}
+
+
+void ofApp::joystickControl() 
+{
+	int driftTolerance = 16;
+
+	// Rotate camera left/right
+	if (m_joystickVal.y < 512 - driftTolerance) m_camRotFactor = 1;
+	else if (m_joystickVal.y > 512 + driftTolerance) m_camRotFactor = -1;
+	else m_camRotFactor = 0;
+
+	// Forward/backward movement
+	if (m_joystickVal.x > 512 + driftTolerance) m_camMoveFactor = -1;
+	else if (m_joystickVal.x < 512 - driftTolerance) m_camMoveFactor = 1;
+	else m_camMoveFactor = 0;
+}
+
+void ofApp::buttonControl() {
+	if (m_buttonVal == 0) m_isSucking = true;
+	else m_isSucking = false;
 }
 
 //--------------------------------------------------------------

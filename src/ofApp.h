@@ -25,6 +25,8 @@ class ofApp : public ofBaseApp
 		bool m_bSetup;
 		void setupArduino(const int& _version);
 		void updateArduino();
+		void joystickControl();
+		void buttonControl();
 
 		// 3D rendering
 		ofEasyCam m_cam;
@@ -34,8 +36,8 @@ class ofApp : public ofBaseApp
 		float m_attenuationFactor;
 
 		// Player / camera movement
-		float m_camRotFactor;
-		bool m_camIsMoving;
+		int m_camRotFactor;
+		int m_camMoveFactor;
 
 		// Resources
 		ofTexture m_batterySprites[7], m_heartSmallSprites, m_heartLargeSprites;
