@@ -2,9 +2,9 @@
 
 #include "ofMain.h"
 #include "ofxAssimpModelLoader.h"
-//#include "ofxImGui.h"
 #include "Mob.h"
 #include "Door.h"
+#include "Sector.h"
 #include "ofArduino.h"
 
 class ofApp : public ofBaseApp
@@ -50,6 +50,11 @@ class ofApp : public ofBaseApp
 
 		// Doors
 		std::vector<Door> doors;
+
+		// Sectors
+		std::vector<Sector> sectors;
+		Sector m_sector = Sector(0, 0, 0, 0);
+		void fitToSector();
 
 		// Mobs
 		std::vector<Mob> mobs;

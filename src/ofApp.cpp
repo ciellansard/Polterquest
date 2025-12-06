@@ -29,8 +29,8 @@ void ofApp::setup()
 
 	// Set up the camera / player info
 	m_cam.setAutoDistance(false);
-	m_cam.setPosition(0.0f, 1.8f, 0.0f);
-	m_cam.setNearClip(1); // Minimizes camera clipping on nearby objects.
+	m_cam.setPosition(1.0f, 1.8f, 0.0f);
+	m_cam.setNearClip(0.3f); // Minimizes camera clipping on nearby objects.
 	m_cam.rotateDeg(90.0f, 0, 1, 0);
 	m_cam.disableMouseInput();
 	m_camRotFactor = 0;
@@ -66,6 +66,11 @@ void ofApp::setup()
 	doors.push_back(Door({  -5, 0, -23 }, -180.0f,      false));
 	doors.push_back(Door({ 20, 0, -50 }, -90.0f, false));
 
+	// Create sectors
+	sectors.push_back(Sector(0, 5, -10, -5));
+
+	m_sector = sectors.at(0);
+
 	ofEnableDepthTest();
 }
 
@@ -73,15 +78,27 @@ void ofApp::setup()
 void ofApp::update()
 {
 	updateArduino();
-	joystickControl();
-	buttonControl();
+	//joystickControl();  // Remove slashes to play with custom controller
+	//buttonControl();
 
 	m_camLight.setPosition(m_cam.getPosition());
-	m_cam.rotateDeg(0.5f * m_camRotFactor, 0, 1, 0);
+	m_cam.rotateDeg(0.75f * m_camRotFactor, 0, 1, 0);
 	m_cam.setPosition(m_cam.getPosition().x + 0.05f * m_camMoveFactor * m_cam.getLookAtDir().x, 
 		              m_cam.getPosition().y, 
 		              m_cam.getPosition().z + 0.05f * m_camMoveFactor * m_cam.getLookAtDir().z);
+
+
+	//fitToSector(); // Collision check
 	
+
+	for (int i = 0; i < doors.size(); i++)
+	{
+		if (doors.at(i).isClosed && abs(m_cam.getPosition().x - doors.at(i).pos.x) <= 1 && abs(m_cam.getPosition().z - doors.at(i).pos.z) <= 1) doors.at(i).unlock();
+	}
+
+	
+
+
 	// Dim light as battery gets low.
 	m_attenuationFactor = ofMap(m_batteryPercentage, 0.5f, 0.0f, 0.0f, 0.5f);
 
@@ -97,9 +114,8 @@ void ofApp::update()
 
 		// Camera shake
 		m_cam.setPosition(m_cam.getPosition().x, 1.8f + (sin(ofGetElapsedTimeMillis() / 20.0f) - 1.0f) / 60.0f, m_cam.getPosition().z);
-
-		//printf("\%: %f   | state: %i\n", m_batteryPercentage, m_batteryState);
 	}
+
 	else
 	{
 		// Player glow is a soft warm yellow.
@@ -113,7 +129,6 @@ void ofApp::update()
 	{
 		mobs.at(i).update();
 	}
-
 
 	float sign = (m_cam.getOrientationEulerDeg().x == -180.0f || m_cam.getOrientationEulerDeg().x == 180.0f) ? -1.0f : 1.0f;
 	m_uiRot = m_cam.getOrientationEulerDeg().y * sign + ((sign == -1.0f) ? 180.0f : 0);
@@ -237,9 +252,43 @@ void ofApp::joystickControl()
 	else m_camMoveFactor = 0;
 }
 
-void ofApp::buttonControl() {
+void ofApp::buttonControl() 
+{
 	if (m_buttonVal == 0) m_isSucking = true;
 	else m_isSucking = false;
+}
+
+void ofApp::fitToSector()
+{
+	//Constrain player to a sector
+	
+	float sectorMargin = 0.5f;
+	float fitTally;
+	bool sectorFound = false;
+
+	for (int i = 0; i < sectors.size(); i++)
+	{
+		fitTally = 0;
+		if (m_cam.getPosition().x >= sectors.at(i).minX + sectorMargin) fitTally++;
+		if (m_cam.getPosition().x <= sectors.at(i).maxX - sectorMargin) fitTally++;
+		if (m_cam.getPosition().z >= sectors.at(i).minZ + sectorMargin) fitTally++;
+		if (m_cam.getPosition().z <= sectors.at(i).maxZ - sectorMargin) fitTally++;
+
+		if (fitTally == 4)
+		{
+			m_sector = sectors.at(i);
+			sectorFound = true;
+			break;
+		}
+	}
+
+	if (!sectorFound)
+	{
+		if (m_cam.getPosition().x < m_sector.minX + sectorMargin) m_cam.setPosition(m_sector.minX + sectorMargin, m_cam.getPosition().y, m_cam.getPosition().z);
+		if (m_cam.getPosition().x > m_sector.maxX - sectorMargin) m_cam.setPosition(m_sector.maxX - sectorMargin, m_cam.getPosition().y, m_cam.getPosition().z);
+		if (m_cam.getPosition().z < m_sector.minZ + sectorMargin) m_cam.setPosition(m_cam.getPosition().x, m_cam.getPosition().y, m_sector.minZ + sectorMargin);
+		if (m_cam.getPosition().z > m_sector.maxZ - sectorMargin) m_cam.setPosition(m_cam.getPosition().x, m_cam.getPosition().y, m_sector.maxZ - sectorMargin);
+	}
 }
 
 //--------------------------------------------------------------

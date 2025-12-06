@@ -12,6 +12,6 @@ public:
 
 
 	Door(ofVec3f _pos, float _rot, bool _isLocked);
-	void unlock(bool* _key);
+	void unlock();
 	void draw();
 };

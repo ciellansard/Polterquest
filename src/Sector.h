@@ -1,18 +1,10 @@
 #pragma once
-#include "ofApp.h"
+#include "ofMain.h"
 
-enum sectorType
-{
-	room,
-	hall
-};
-
-// A sector is a walkable area of the map defined by four corner coordinates.
-class Sector
+// A sector is a walkable area of the map defined by four limits.
+class Sector : public ofBaseApp
 {
 public:
-	ofVec2f* getCorners();
-
-protected:
-	ofVec2f corners[4];
+	float maxX, maxZ, minX, minZ;
+	Sector(float _maxX, float _maxZ, float _minX, float _minZ);
 };

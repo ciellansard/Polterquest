@@ -13,19 +13,24 @@ Door::Door(ofVec3f _pos, float _rot, bool _isLocked)
 	ofMesh mesh;
 }
 
-void Door::unlock(bool* _key)
+
+void Door::unlock()
 {
-	_key = false; // Player uses up their key and no longer has one.
-	//delete this;
+	isClosed = false;
+	isLocked = false;
 }
 
 void Door::draw()
 {
-	ofPushMatrix();
+	if (isClosed)
 	{
-		ofTranslate(pos.x, pos.y, pos.z);
-		ofRotateYDeg(rot);
-		mesh.draw();
+		ofPushMatrix();
+		{
+			ofTranslate(pos.x, pos.y, pos.z);
+			ofRotateYDeg(rot);
+			mesh.draw();
+		}
+		ofPopMatrix();
 	}
-	ofPopMatrix();
+	
 }

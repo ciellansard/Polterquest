@@ -19,12 +19,12 @@ Mob::Mob(int _type, int _loot, ofVec3f _pos, float _rot, ofEasyCam *_player)
 	if (type == 0)
 	{
 		health = 2.0f;
-		defaultSpeed = 0.005f;
+		defaultSpeed = 0.0025f;
 	}
 	else
 	{
-		health = 10.0f;
-		defaultSpeed = 0.002f;
+		health = 6.0f;
+		defaultSpeed = 0.001f;
 	}
 	
 	currentSpeed = defaultSpeed;
@@ -42,12 +42,7 @@ Mob::Mob(int _type, int _loot, ofVec3f _pos, float _rot, ofEasyCam *_player)
 	isAwareOfPlayer = false;
 	lastTimeAwareOfPlayer = NULL;
 }
-/*
-Mob::~Mob()
-{
-	delete player;
-}
-*/
+
 void Mob::update()
 {
 	switch (state)
@@ -66,6 +61,13 @@ void Mob::update()
 		case angry:
 		{
 			currentSpeed = defaultSpeed * 3.0f;
+
+			// Stop mob from clipping into player
+			float distToPlayer = (pow(player->getPosition().x - pos.x, 2) + pow(player->getPosition().z - pos.z, 2));
+			if (distToPlayer <= 5.0f)
+			{
+				currentSpeed = 0;
+			}
 			chase();
 			break;
 		}
@@ -84,8 +86,6 @@ void Mob::update()
 	// Bob up and down. 0.1f is the amplitude, currentSpeed/5.0f controls the frequency, and +1 ensures that ghost won't clip
 	// through the floor at the bottom of the cycle
 	pos.y = 0.1f * (sin(ofGetElapsedTimeMillis() * currentSpeed / 5.0f) + 1.0f);
-
-	//((sin(ofGetElapsedTimeMillis() * currentSpeed) == 0)) ? flipFactor = 3 : flipFactor = 1;
 }
 
 void Mob::draw()
@@ -114,7 +114,6 @@ void Mob::chase()
 	float newZ = sin(theta) * currentSpeed;
 
 	pos.set(pos.x - newX, pos.y, pos.z - newZ);
-	printf("(%f, %f, %f)\n", pos.x, pos.y, pos.z);
 }
 
 void Mob::beAttacked()
