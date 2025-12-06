@@ -25,8 +25,6 @@ class ofApp : public ofBaseApp
 		bool m_bSetup;
 		void setupArduino(const int& _version);
 		void updateArduino();
-		void digitalPinChanged(const int& pinNum);
-		void analogPinChanged(const int& pinNum);
 
 		// 3D rendering
 		ofEasyCam m_cam;

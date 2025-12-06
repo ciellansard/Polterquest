@@ -44,7 +44,7 @@ void ofApp::setup()
 	m_bSetup = false;
 
 	m_joystickVal = { 0.0f, 0.0f };
-	m_accelerometerVal = { 0.0f, 0.0f, 0.0f };
+	m_buttonVal = 0;
 
 	// Set up a light that follows the player
 	m_camLight.setPointLight();
@@ -54,10 +54,17 @@ void ofApp::setup()
 	m_camLight.enable();
 	
 	// Create mobs
-	mobs.push_back(Mob(0, {2, 0, 5}, 15, &m_cam));
+	mobs.push_back(Mob(0, NULL, {-8, 0, -3}, 0, &m_cam));
+	mobs.push_back(Mob(0, NULL, { -8, 0, 3 }, 0, &m_cam));
 	
 	// Create doors
-	doors.push_back(Door({ 1, 0, 3 }, 0, false));
+	doors.push_back(Door({  -5, 0,  -5 }, -180.0f,      true));
+	doors.push_back(Door({ -10, 0,   0 }, -90.0f, false));
+	doors.push_back(Door({  -5, 0, -15 }, 0,      false));
+	doors.push_back(Door({ -12, 0, -19 }, -90.0f, false));
+	doors.push_back(Door({   2, 0, -19 }, -90.0f, false));
+	doors.push_back(Door({  -5, 0, -23 }, -180.0f,      false));
+	doors.push_back(Door({ 20, 0, -50 }, -90.0f, false));
 
 	ofEnableDepthTest();
 }
@@ -188,67 +195,31 @@ void ofApp::keyReleased(int key)
 }
 
 //--------------------------------------------------------------
-void ofApp::setupArduino(const int& version) {
-
+void ofApp::setupArduino(const int& version) 
+{
 	// remove listener because we don't need it anymore
 	ofRemoveListener(m_arduino.EInitialized, this, &ofApp::setupArduino);
 
 	// it is now safe to send commands to the Arduino
 	m_bSetup = true;
 
-	// print firmware name and version to the console
-	ofLogNotice() << m_arduino.getFirmwareName();
-	ofLogNotice() << "firmata v" << m_arduino.getMajorFirmwareVersion() << "." << m_arduino.getMinorFirmwareVersion();
-	
 	m_arduino.sendDigitalPinMode(PIN_BUTTON_INPUT, ARD_INPUT);
 	m_arduino.sendAnalogPinReporting(PIN_JOYSTICK_X_INPUT, ARD_ANALOG);
 	m_arduino.sendAnalogPinReporting(PIN_JOYSTICK_Y_INPUT, ARD_ANALOG);
-	m_arduino.sendAnalogPinReporting(PIN_ACCELEROMETER_X_INPUT, ARD_ANALOG);
-	m_arduino.sendAnalogPinReporting(PIN_ACCELEROMETER_Y_INPUT, ARD_ANALOG);
-
-	// Listen for changes on the digital and analog pins
-	ofAddListener(m_arduino.EDigitalPinChanged, this, &ofApp::digitalPinChanged);
-	ofAddListener(m_arduino.EAnalogPinChanged, this, &ofApp::analogPinChanged);
 }
 
 //--------------------------------------------------------------
-void ofApp::updateArduino() {
-
+void ofApp::updateArduino() 
+{
 	m_arduino.update();
 
-	// do not send anything until the arduino has been set up
 	if (m_bSetup) {
 		m_joystickVal.x = m_arduino.getAnalog(PIN_JOYSTICK_X_INPUT);
 		m_joystickVal.y = m_arduino.getAnalog(PIN_JOYSTICK_Y_INPUT);
-		m_accelerometerVal.x = m_arduino.getAnalog(PIN_ACCELEROMETER_X_INPUT);
-		m_accelerometerVal.y = m_arduino.getAnalog(PIN_ACCELEROMETER_Y_INPUT);
 		m_buttonVal = m_arduino.getDigital(PIN_BUTTON_INPUT);
-
-		//printf("(%i, %i)   |   (%i, %i)   |   %f\n", m_joystickVal.x, m_joystickVal.y, m_accelerometerVal.x, m_accelerometerVal.y, m_buttonVal);
-		cout << "(" << m_joystickVal.x << ", " << m_joystickVal.y << ")   |   (" << m_accelerometerVal.x << ", " << m_accelerometerVal.y << ")   |   " << m_buttonVal << "\n";
+		// cout << "(" << m_joystickVal.x << ", " << m_joystickVal.y << ")   |   (" << m_accelerometerVal.x << ", " << m_accelerometerVal.y << ")   |   " << m_buttonVal << "\n";
 	}
 }
-
-// digital pin event handler, called whenever a digital pin value has changed
-// note: if an analog pin has been set as a digital pin, it will be handled
-// by the digitalPinChanged function rather than the analogPinChanged function.
-
-//--------------------------------------------------------------
-void ofApp::digitalPinChanged(const int& pinNum) {
-	// do something with the digital input. here we're simply going to print the pin number and
-	// value to the screen each time it changes
-	//buttonState = "digital pin: " + ofToString(pinNum) + " = " + ofToString(ard.getDigital(pinNum));
-}
-
-// analog pin event handler, called whenever an analog pin value has changed
-
-//--------------------------------------------------------------
-void ofApp::analogPinChanged(const int& pinNum) {
-	// do something with the analog input. here we're simply going to print the pin number and
-	// value to the screen each time it changes
-	//potValue = "analog pin: " + ofToString(pinNum) + " = " + ofToString(ard.getAnalog(pinNum));
-}
-
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){

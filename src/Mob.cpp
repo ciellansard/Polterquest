@@ -9,7 +9,7 @@ enum states
 };
 
 // Player _player
-Mob::Mob(int _type, ofVec3f _pos, float _rot, ofEasyCam *_player)
+Mob::Mob(int _type, int _loot, ofVec3f _pos, float _rot, ofEasyCam *_player)
 {
 	type = _type;
 	pos = _pos;
@@ -18,13 +18,13 @@ Mob::Mob(int _type, ofVec3f _pos, float _rot, ofEasyCam *_player)
 
 	if (type == 0)
 	{
-		health = 5.0f;
-		defaultSpeed = 0.002f;
+		health = 2.0f;
+		defaultSpeed = 0.005f;
 	}
 	else
 	{
-		health = 20.0f;
-		defaultSpeed = 0.001f;
+		health = 10.0f;
+		defaultSpeed = 0.002f;
 	}
 	
 	currentSpeed = defaultSpeed;
@@ -66,8 +66,7 @@ void Mob::update()
 		case angry:
 		{
 			currentSpeed = defaultSpeed * 3.0f;
-			rot = atan((player->getPosition().z - pos.z) / (player->getPosition().x - pos.x));
-			//printf("%f\n", rot);
+			chase();
 			break;
 		}
 		case suck:
@@ -78,16 +77,13 @@ void Mob::update()
 		default: break;
 	}
 
-	//printf("%f, %f, %f\n", player->getPosition().x, player->getPosition().y, player->getPosition().z);
-
 	// Get texture for current state
 	if (texPath != "images/mobs/mob" + ofToString(type) + ofToString(state) + ".png") texPath = "images/mobs/mob" + ofToString(type) + ofToString(state) + ".png";
 	ofLoadImage(tex, texPath);
 
-	// Movement
-	pos.y = 0.1f * (sin(ofGetElapsedTimeMillis() * -currentSpeed) + 1.0f);
-	pos.x += cos(rot) * -currentSpeed;
-	pos.z += sin(rot) * -currentSpeed;
+	// Bob up and down. 0.1f is the amplitude, currentSpeed/5.0f controls the frequency, and +1 ensures that ghost won't clip
+	// through the floor at the bottom of the cycle
+	pos.y = 0.1f * (sin(ofGetElapsedTimeMillis() * currentSpeed / 5.0f) + 1.0f);
 
 	//((sin(ofGetElapsedTimeMillis() * currentSpeed) == 0)) ? flipFactor = 3 : flipFactor = 1;
 }
@@ -106,12 +102,19 @@ void Mob::draw()
 		tex.unbind();
 	}
 	ofPopMatrix();
-	
 }
 
 void Mob::chase()
 {
+	// Mob approaches player, moving a maximum of currentSpeed units per execution.
+	float deltaX = pos.x - player->getPosition().x;
+	float deltaZ = pos.z - player->getPosition().z;
+	float theta = atan2f(deltaZ, deltaX);
+	float newX = cos(theta) * currentSpeed;
+	float newZ = sin(theta) * currentSpeed;
 
+	pos.set(pos.x - newX, pos.y, pos.z - newZ);
+	printf("(%f, %f, %f)\n", pos.x, pos.y, pos.z);
 }
 
 void Mob::beAttacked()

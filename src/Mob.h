@@ -17,7 +17,7 @@ public:
 	ofEasyCam* player;
 	//Sector sector;
 
-	Mob(int _type, ofVec3f _pos, float _rot, ofEasyCam *_player);
+	Mob(int _type, int _loot, ofVec3f _pos, float _rot, ofEasyCam *_player);
 	//~Mob();
 	void update();
 	void draw();
